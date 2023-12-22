@@ -21,3 +21,5 @@
 go.work
 main-app
 app
+notes.json
+todo.json

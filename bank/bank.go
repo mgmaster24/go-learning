@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	"github.com/Pallinder/go-randomdata"
-	"go-learning.com/learning/gol_io"
+	gol_io "go-learning.com/learning/io"
 )
 
 func Run() {
 	const fileName = "balance.txt"
 	fmt.Println("Welcome to GO Bank!")
 	fmt.Println(fmt.Sprintf("Contact us at %s", randomdata.PhoneNumber()))
-	var accountBalance, err = gol_io.GetFloatValueFromFile(fileName)
+	accountBalance, err := gol_io.GetFloatValueFromFile(fileName)
 	if err != nil {
 		fmt.Println("Error retrieving your balance.  Please speak to your admin.")
 		fmt.Println("**Initial value with be zero for this session**")
