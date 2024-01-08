@@ -2,13 +2,14 @@ package gol_datastructures
 
 import "fmt"
 
-type SinglyLinkedList[T comparable] struct {
-	head *SllNode[T]
+type DoublyLinkedList[T comparable] struct {
+	head *DllNode[T]
 }
 
-func (list *SinglyLinkedList[T]) PushBack(val T) {
+func (list *DoublyLinkedList[T]) PushBack(val T) {
 	if list.head == nil {
-		list.head = &SllNode[T]{
+		list.head = &DllNode[T]{
+			prev: nil,
 			next: nil,
 			val:  val,
 		}
@@ -18,15 +19,17 @@ func (list *SinglyLinkedList[T]) PushBack(val T) {
 			currNode = currNode.next
 		}
 
-		currNode.next = &SllNode[T]{
+		currNode.next = &DllNode[T]{
+			prev: currNode,
 			next: nil,
 			val:  val,
 		}
 	}
 }
 
-func (list *SinglyLinkedList[T]) PushFront(val T) {
-	newHead := &SllNode[T]{
+func (list *DoublyLinkedList[T]) PushFront(val T) {
+	newHead := &DllNode[T]{
+		prev: nil,
 		next: list.head,
 		val:  val,
 	}
@@ -34,10 +37,10 @@ func (list *SinglyLinkedList[T]) PushFront(val T) {
 	list.head = newHead
 }
 
-func (list *SinglyLinkedList[T]) InsertBefore(beforeVal, val T) {
+func (list *DoublyLinkedList[T]) InsertBefore(beforeVal, val T) {
 	found := list.Find(beforeVal)
 	if found != nil {
-		newNode := &SllNode[T]{
+		newNode := &DllNode[T]{
 			val:  found.val,
 			next: found.next,
 		}
@@ -47,10 +50,10 @@ func (list *SinglyLinkedList[T]) InsertBefore(beforeVal, val T) {
 	}
 }
 
-func (list *SinglyLinkedList[T]) InsertAfter(afterVal, val T) {
+func (list *DoublyLinkedList[T]) InsertAfter(afterVal, val T) {
 	found := list.Find(afterVal)
 	if found != nil {
-		newNode := &SllNode[T]{
+		newNode := &DllNode[T]{
 			val:  val,
 			next: found.next,
 		}
@@ -59,9 +62,9 @@ func (list *SinglyLinkedList[T]) InsertAfter(afterVal, val T) {
 	}
 }
 
-func (list *SinglyLinkedList[T]) Delete(val T) {
+func (list *DoublyLinkedList[T]) Delete(val T) {
 	currentNode := list.head
-	var previousNode *SllNode[T] = nil
+	var previousNode *DllNode[T] = nil
 	for currentNode != nil {
 		if currentNode.val == val {
 			if previousNode == nil {
@@ -76,7 +79,7 @@ func (list *SinglyLinkedList[T]) Delete(val T) {
 	}
 }
 
-func (list *SinglyLinkedList[T]) Find(val T) *SllNode[T] {
+func (list *DoublyLinkedList[T]) Find(val T) *DllNode[T] {
 	currentNode := list.head
 	for currentNode != nil {
 		if currentNode.val == val {
@@ -89,7 +92,7 @@ func (list *SinglyLinkedList[T]) Find(val T) *SllNode[T] {
 	return nil
 }
 
-func (list *SinglyLinkedList[T]) Print() {
+func (list *DoublyLinkedList[T]) Print() {
 	if list == nil || list.head == nil {
 		fmt.Println("Nothing to print")
 	}

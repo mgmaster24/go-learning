@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	gol_datastructures "go-learning.com/learning/data_structures"
 	gol_io "go-learning.com/learning/io"
 )
 
@@ -15,6 +16,7 @@ type Note struct {
 }
 
 type Notes []Note
+type NoteList gol_datastructures.SinglyLinkedList[Note]
 
 func New(title, content string) (Note, error) {
 	if title == "" || content == "" {
