@@ -1,4 +1,4 @@
-package calculators
+package gol_calculators
 
 import (
 	"errors"
