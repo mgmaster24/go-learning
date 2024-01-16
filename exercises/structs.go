@@ -3,6 +3,7 @@ package gol_exercises
 import (
 	"fmt"
 
+	gol_io "go-learning.com/learning/io"
 	gol_user "go-learning.com/learning/user"
 )
 
@@ -26,7 +27,6 @@ func RunStructsExercise() {
 }
 
 func getUserData(context string) (val string) {
-	fmt.Print(context)
-	fmt.Scanln(&val)
+	gol_io.ScanForInput(context, &val)
 	return
 }

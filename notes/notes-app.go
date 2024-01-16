@@ -20,8 +20,8 @@ func Run() {
 	}
 
 	shouldContinue := "y"
-	fmt.Print("Would you like to add a new note? (y/n)")
-	fmt.Scanln(&shouldContinue)
+	shouldContinue = gol_io.GetUserInput("Would you like to add a new note? (y/n)")
+	fmt.Println()
 	if shouldContinue == "y" {
 		getNotes(&notes)
 	}
@@ -46,8 +46,7 @@ func getNotes(notes *Notes) {
 		notes.Add(note)
 
 		shouldContinue := "y"
-		fmt.Print("Would you like to add another? (y/n)")
-		fmt.Scanln(&shouldContinue)
+		shouldContinue = gol_io.GetUserInput("Would you like to add another? (y/n)")
 		if shouldContinue == "n" {
 			break
 		}

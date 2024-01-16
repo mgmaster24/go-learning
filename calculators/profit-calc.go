@@ -3,28 +3,9 @@ package gol_calculators
 import (
 	"errors"
 	"fmt"
-	"math"
-	"os"
+
+	gol_io "go-learning.com/learning/io"
 )
-
-func CalculateInvestment() {
-	var investmentAmount, years, expectedROI float64
-	const inflationRate = 2.5
-
-	fmt.Print("Enter the investment amount: ")
-	fmt.Scan(&investmentAmount)
-
-	fmt.Print("Enter the years to invest: ")
-	fmt.Scan(&years)
-
-	fmt.Print("Enter the expected return on investment: ")
-	fmt.Scan(&expectedROI)
-
-	futureVal := investmentAmount * math.Pow(1+expectedROI/100, years)
-	futureRealVal := futureVal / math.Pow(1+inflationRate/100, years)
-	fmt.Println("Future Value of Investment - ", fmt.Sprintf("%.2f", futureVal))
-	fmt.Println(fmt.Sprintf("Future Inflation Adjusted Value of Investment (Inflation Rate(%%): %v) -", inflationRate), fmt.Sprintf("%.2f", futureRealVal))
-}
 
 func CalculateProfit() {
 	revenue, err := getProfitVar("Enter the expected revenue: ")
@@ -64,8 +45,7 @@ func calculateProfitResults(revenue, expenses, taxRate float64) (ebt float64, ea
 }
 
 func validateInput(context string) (validInput float64, err error) {
-	fmt.Print(context)
-	fmt.Scan(&validInput)
+	gol_io.ScanForInput(context, &validInput)
 	if validInput <= 0 {
 		return -1, errors.New("Values can't be 0 or negative...exiting")
 	}
@@ -75,5 +55,5 @@ func validateInput(context string) (validInput float64, err error) {
 
 func storeCalculatedResults(fileName string, ebt, eat, ratio float64) {
 	var output string = fmt.Sprintf("EBT:%.2f\nEAT:%.2f\nRatio:%.2f", ebt, eat, ratio)
-	os.WriteFile(fileName, []byte(output), 0644)
+	gol_io.WriteStringToFile(fileName, output)
 }

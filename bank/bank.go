@@ -24,8 +24,7 @@ func Run() {
 	for {
 		option := 0
 
-		fmt.Print("Selection: ")
-		fmt.Scan(&option)
+		gol_io.ScanForInput("Selection: ", &option)
 		if option == 4 {
 			break
 		}
@@ -78,9 +77,7 @@ func validateAdjusment(
 	action string,
 	adjustment *float64,
 	isDeposit bool) bool {
-	fmt.Printf("Please enter the amount to %v: ", action)
-	fmt.Scan(adjustment)
-
+	gol_io.ScanForInput(fmt.Sprintf("Please enter the amount to %v: ", action), adjustment)
 	if *adjustment <= 0.0 {
 		fmt.Println("Please enter a valid amount. ")
 		return false
