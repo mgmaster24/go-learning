@@ -8,33 +8,33 @@ import (
 	"strconv"
 )
 
-type FileManager struct {
-	InputFileName string
+type FileHandler struct {
+	InputFileName  string
 	OutputFileName string
 }
 
-func NewFileManager(inputFile, outputFile string) FileManager{
-	return FileManager{
-		InputFileName: inputFile,
+func NewFileHandler(inputFile, outputFile string) FileHandler {
+	return FileHandler{
+		InputFileName:  inputFile,
 		OutputFileName: outputFile,
 	}
 }
 
-func (fileManager FileManager) WriteResult(data any) {
-	SaveJsonData(fileManager.OutputFileName, data)
+func (fileHandler FileHandler) WriteResult(data any) error {
+	return SaveJsonData(fileHandler.OutputFileName, data)
 }
 
-func (fileManager FileManager) ReadLines() ([]float64, error) {
-	vals, err := ReadFloatArrayFromFile(fileManager.InputFileName)
+func (fileHandler FileHandler) ReadLines() ([]float64, error) {
+	vals, err := ReadFloatArrayFromFile(fileHandler.InputFileName)
 	return vals, err
 }
 
-func WriteFloatValToFile(fileName string, value float64) {
-	WriteStringToFile(fileName, fmt.Sprint(value))
+func WriteFloatValToFile(fileName string, value float64) error {
+	return WriteStringToFile(fileName, fmt.Sprint(value))
 }
 
-func WriteStringToFile(fileName string, value string) {
-	os.WriteFile(fileName, []byte(value), 0644)
+func WriteStringToFile(fileName string, value string) error {
+	return os.WriteFile(fileName, []byte(value), 0644)
 }
 
 func GetFloatValueFromFile(fileName string) (float64, error) {
@@ -53,38 +53,36 @@ func GetFloatValueFromFile(fileName string) (float64, error) {
 	return value, nil
 }
 
-func ReadFloatArrayFromFile(file string) (vals []float64, err error) {
+func ReadFloatArrayFromFile(file string) ([]float64, error) {
 	f, err := os.Open(file)
-	if (err != nil) {
+	if err != nil {
 		err = fmt.Errorf("Could not open file! - %w", err)
-		f.Close()
-		return
+		return nil, err
 	}
 
+	var vals []float64
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		line := scanner.Text()
 		price, err := strconv.ParseFloat(line, 64)
-		if (err != nil) {
-			err = fmt.Errorf("Could not parse string as float64 - %w", err)
-			break;
+		if err != nil {
+			err = fmt.Errorf("Could not parse value (%v) as float64 - %w", line, err)
+			return nil, err
 		}
 
 		vals = append(vals, price)
 	}
 
 	err = scanner.Err()
-	if (err != nil) {
+	if err != nil {
 		err = fmt.Errorf("Error reading file - %w", err)
-		vals = nil
+		return nil, err
 	}
 
-	f.Close()
+	defer f.Close()
 
-	return
+	return vals, nil
 }
-
-
 
 func LoadJsonData[T any](fileName string) (T, error) {
 	var val T
@@ -103,7 +101,6 @@ func LoadJsonData[T any](fileName string) (T, error) {
 
 func SaveJsonData(fileName string, val interface{}) error {
 	json, err := json.Marshal(val)
-
 	if err != nil {
 		return err
 	}

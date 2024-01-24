@@ -7,6 +7,7 @@ import (
 
 	gol_banking "go-learning.com/learning/bank"
 	gol_calculators "go-learning.com/learning/calculators"
+	gol_concurrency "go-learning.com/learning/concurrency"
 	gol_datastructures "go-learning.com/learning/data_structures"
 	gol_exercises "go-learning.com/learning/exercises"
 	gol_notes "go-learning.com/learning/notes"
@@ -31,11 +32,18 @@ func main() {
 		9:  {"Fun with Slices", gol_exercises.RunSlicesExcercise},
 		10: {"Fun with Maps", gol_exercises.RunMapsExercise},
 		11: {"Functions Deep Dive", gol_exercises.RunFunctionsExercise},
+		12: {"Concurrency", gol_concurrency.Run},
 	}
 
 	var option int
+	keys := getSortedKeys(apps)
+	min := keys[0]
+	max := keys[len(keys)-1]
 	for {
-		printApps(apps)
+		for _, k := range keys {
+			fmt.Printf("%v) %s\n", k, apps[k].title)
+		}
+
 		fmt.Print("Select and option from above or q to quit: ")
 		var input string
 		fmt.Scan(&input)
@@ -46,8 +54,7 @@ func main() {
 		}
 
 		option, _ = strconv.Atoi(input)
-
-		if validateSelection(apps, option) {
+		if option >= min && option <= max {
 			apps[option].execute()
 		} else {
 			fmt.Println("Invalid selection... Please try again.")
@@ -65,19 +72,4 @@ func getSortedKeys(apps map[int]App) []int {
 
 	slices.Sort(keys)
 	return keys
-}
-
-func validateSelection(apps map[int]App, selection int) bool {
-	keys := getSortedKeys(apps)
-	min := keys[0]
-	max := keys[len(keys)-1]
-	return selection >= min && selection <= max
-}
-
-func printApps(apps map[int]App) {
-	keys := getSortedKeys(apps)
-
-	for _, k := range keys {
-		fmt.Printf("%v) %s\n", k, apps[k].title)
-	}
 }

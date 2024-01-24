@@ -9,6 +9,11 @@ type IoOps interface {
 	Print()
 }
 
+type IoHandler interface {
+	WriteResult(data any) error
+	ReadLines() ([]float64, error)
+}
+
 func OutPutAndSave(ioOperator IoOps, fileName string) {
 	ioOperator.Print()
 	fmt.Println("Saving...")
@@ -17,7 +22,6 @@ func OutPutAndSave(ioOperator IoOps, fileName string) {
 		fmt.Println(err)
 	}
 }
-
 
 func GetUserInput(prompt string) (val string) {
 	fmt.Printf("%s", prompt)
