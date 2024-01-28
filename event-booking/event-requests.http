@@ -1,0 +1,32 @@
+POST http://localhost:8080/events
+Content-Type: application/json
+
+{
+  "Name": "New Year's Dinner",
+  "Description": "Dinner on New Year's Day",
+  "Location": "Cary, NC",
+  "DateTime": "2024-02-14T13:08:30.000-06:00"
+}
+
+2024-01-15T15:23:31.78274777-05:00"
+
+###
+GET http://localhost:8080/events
+
+###
+GET http://localhost:8080/events/2
+
+###
+PUT http://localhost:8080/events/2
+Content-Type: application/json
+
+{
+  "Name": "Event 2",
+  "Description": "Updated event location again",
+  "Location": "WIllmington, NC",
+  "DateTime": "2024-01-26T13:08:30.000-06:00",
+  "UserId": "7512ebd1-8626-4f70-bda4-224e1dab7624"
+}
+
+###
+DELETE http://localhost:8080/events/4

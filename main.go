@@ -9,6 +9,7 @@ import (
 	gol_calculators "go-learning.com/learning/calculators"
 	gol_concurrency "go-learning.com/learning/concurrency"
 	gol_datastructures "go-learning.com/learning/data_structures"
+	gol_eventbooking "go-learning.com/learning/event-booking"
 	gol_exercises "go-learning.com/learning/exercises"
 	gol_notes "go-learning.com/learning/notes"
 	gol_todo "go-learning.com/learning/todo"
@@ -33,6 +34,7 @@ func main() {
 		10: {"Fun with Maps", gol_exercises.RunMapsExercise},
 		11: {"Functions Deep Dive", gol_exercises.RunFunctionsExercise},
 		12: {"Concurrency", gol_concurrency.Run},
+		13: {"Rest API", gol_eventbooking.Run},
 	}
 
 	var option int
