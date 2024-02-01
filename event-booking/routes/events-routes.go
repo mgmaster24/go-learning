@@ -1,21 +1,16 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"go-learning.com/learning/event-booking/models"
 	"go-learning.com/learning/event-booking/response"
 )
 
-func getEvents(c *gin.Context) {
-	db, err := getDBConn(c)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not establish DB connection", err)
-	}
-	events, err := models.GetEvents(db)
+func (sqlDB *SqlDB) getEvents(c *gin.Context) {
+	events, err := models.GetEvents(sqlDB.DB)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Could not get events from the DB.", err)
 		return
@@ -23,14 +18,13 @@ func getEvents(c *gin.Context) {
 	response.Success(c, http.StatusOK, events)
 }
 
-func getEvent(c *gin.Context) {
-	db, err := getDBConn(c)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not establish DB connection", err)
+func (sqlDB *SqlDB) getEvent(c *gin.Context) {
+	id, ok := getIdParam(c)
+	if !ok {
+		return
 	}
 
-	id := getIdParam(c)
-	event, err := models.GetEvent(db, id)
+	event, err := models.GetEvent(sqlDB.DB, id)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Could not get event from the DB.", err)
 		return
@@ -39,20 +33,16 @@ func getEvent(c *gin.Context) {
 	response.Success(c, http.StatusOK, event)
 }
 
-func createEvent(c *gin.Context) {
-	db, err := getDBConn(c)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not establish DB connection", err)
-	}
+func (sqlDB *SqlDB) createEvent(c *gin.Context) {
+	userId := c.GetInt64("userId")
 	var event models.Event
-	err = c.ShouldBindJSON(&event)
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Could not parse request body.", err)
+	if !shouldBindJSON(c, &event) {
 		return
 	}
 
-	event.UserId = uuid.New()
-	err = event.Save(db)
+	event.UserId = userId
+
+	err := event.Save(sqlDB.DB)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Could not save event to DB.", err)
 		return
@@ -61,46 +51,69 @@ func createEvent(c *gin.Context) {
 	response.SuccesWithMsg(c, http.StatusCreated, "Event created", "event", event)
 }
 
-func updatEvent(c *gin.Context) {
-	db, err := getDBConn(c)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not establish DB connection", err)
-	}
-
-	var event models.Event
-	err = c.ShouldBindJSON(&event)
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Could not parse request body.", err)
+func (sqlDB *SqlDB) updateEvent(c *gin.Context) {
+	var requestEvent models.Event
+	if !shouldBindJSON(c, &requestEvent) {
 		return
 	}
 
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		response.Error(c, http.StatusBadRequest, "Could parse id param from url.", err)
+	id, ok := getIdParam(c)
+	if !ok {
 		return
 	}
 
-	err = event.Update(db, id)
+	retrievedEvent, ok := canPerfromAction(sqlDB, id, c, "update")
+	if !ok {
+		return
+	}
+
+	requestEvent.Id = retrievedEvent.Id
+	requestEvent.UserId = retrievedEvent.UserId
+	err := requestEvent.Update(sqlDB.DB)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Could not update the event", err)
 		return
 	}
 
-	response.SuccesWithMsg(c, http.StatusCreated, "Event updated", "event", event)
+	response.SuccesWithMsg(c, http.StatusCreated, "Event updated", "event", requestEvent)
 }
 
-func deleteEvent(c *gin.Context) {
-	db, err := getDBConn(c)
-	if err != nil {
-		response.Error(c, http.StatusInternalServerError, "Could not establish DB connection", err)
+func (sqlDB *SqlDB) deleteEvent(c *gin.Context) {
+	id, ok := getIdParam(c)
+	if !ok {
+		return
 	}
 
-	id := getIdParam(c)
-	err = models.Delete(db, id)
+	retrievedEvent, ok := canPerfromAction(sqlDB, id, c, "delete")
+	if !ok {
+		return
+	}
+
+	err := retrievedEvent.Delete(sqlDB.DB)
 	if err != nil {
 		response.Error(c, http.StatusInternalServerError, "Could not update the event", err)
 		return
 	}
 
 	response.SuccessWithMsgNoObj(c, http.StatusAccepted, "Event deleted")
+}
+
+func canPerfromAction(sqlDB *SqlDB, id int64, c *gin.Context, action string) (*models.Event, bool) {
+	retrievedEvent, err := models.GetEvent(sqlDB.DB, id)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "Could not get event from the DB.", err)
+		return nil, false
+	}
+
+	userId := c.GetInt64("userId")
+	if retrievedEvent.UserId != userId {
+		response.Error(
+			c,
+			http.StatusUnauthorized,
+			fmt.Sprintf("Not authroized to perform %s", action),
+			fmt.Errorf("unathorized to perform %s on resource", action))
+		return nil, false
+	}
+
+	return &retrievedEvent, true
 }

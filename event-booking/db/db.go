@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -16,6 +17,8 @@ func InitDB() *sql.DB {
 	db.SetMaxIdleConns(5)
 
 	createEventsTable(db)
+	createUsersTable(db)
+	createRegistrationsTable(db)
 
 	return db
 }
@@ -28,13 +31,46 @@ func createEventsTable(db *sql.DB) {
 			description TEXT NOT NULL,
 			location TEXT NOT NULL,
 			dateTime DATETIME NOT NULL,
-			user_id INTEGER
+			user_id INTEGER,
+			FOREIGN KEY(user_id) REFERENCES users(id)
 		)
 	`
 
 	_, err := db.Exec(createEventsTable)
 	if err != nil {
 		panic("Could NOT create the events table!")
+	}
+}
+
+func createUsersTable(db *sql.DB) {
+	createUsersTable := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		email TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL
+	)
+	`
+
+	_, err := db.Exec(createUsersTable)
+	if err != nil {
+		panic("Could NOT create the users table!")
+	}
+}
+
+func createRegistrationsTable(db *sql.DB) {
+	createRegistrationsTable := `
+	CREATE TABLE IF NOT EXISTS registrations (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		event_id INTEGER,
+		user_id INTEGER,
+		FOREIGN KEY(event_id) REFERENCES events(id),
+		FOREIGN KEY(user_id) REFERENCES users(id)
+	)
+	`
+
+	_, err := db.Exec(createRegistrationsTable)
+	if err != nil {
+		panic("Could NOT create the registrations table!")
 	}
 }
 
@@ -57,7 +93,14 @@ func GetRows(db *sql.DB, query string) (*sql.Rows, error) {
 	return rows, nil
 }
 
-func GetValById(db *sql.DB, query string, id int64, vals ...any) error {
-	row := db.QueryRow("SELECT * FROM events WHERE id = ?", id)
+func GetRowById(db *sql.DB, table string, id int64, vals ...any) error {
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = ?", table)
+	row := db.QueryRow(query, id)
+	return row.Scan(vals...)
+}
+
+func GetRowByVal(db *sql.DB, selectVal string, table string, key string, val any, vals ...any) error {
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = ?", selectVal, table, key)
+	row := db.QueryRow(query, val)
 	return row.Scan(vals...)
 }

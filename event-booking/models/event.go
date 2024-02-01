@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/google/uuid"
 	"go-learning.com/learning/event-booking/db"
 )
 
@@ -14,7 +13,13 @@ type Event struct {
 	Description string    `binding:"required"`
 	Location    string    `binding:"required"`
 	DateTime    time.Time `binding:"required"`
-	UserId      uuid.UUID
+	UserId      int64
+}
+
+type Registration struct {
+	Id      int64
+	EventId int64
+	UserId  int64
 }
 
 func (event *Event) Save(sqldb *sql.DB) error {
@@ -72,9 +77,9 @@ func GetEvents(sqldb *sql.DB) ([]Event, error) {
 
 func GetEvent(sqldb *sql.DB, id int64) (Event, error) {
 	var event Event
-	err := db.GetValById(
+	err := db.GetRowById(
 		sqldb,
-		"SELECT * FROM events WHERE id = ?",
+		"events",
 		id,
 		&event.Id,
 		&event.Name,
@@ -86,7 +91,7 @@ func GetEvent(sqldb *sql.DB, id int64) (Event, error) {
 	return event, err
 }
 
-func (event *Event) Update(sqldb *sql.DB, id int64) error {
+func (event *Event) Update(sqldb *sql.DB) error {
 	_, err := db.PrepareAndExecVars(
 		sqldb,
 		`
@@ -98,15 +103,56 @@ func (event *Event) Update(sqldb *sql.DB, id int64) error {
 		event.Location,
 		event.DateTime,
 		event.UserId,
-		id)
+		event.Id)
 
 	return err
 }
 
-func Delete(sqldb *sql.DB, id int64) error {
+func (event *Event) Delete(sqldb *sql.DB) error {
 	_, err := db.PrepareAndExecVars(
 		sqldb,
 		`DELETE FROM events WHERE id=?`,
-		id)
+		event.Id)
 	return err
+}
+
+func (event *Event) Register(sqldb *sql.DB, userId int64) error {
+	query := "INSERT INTO registrations(event_id, user_id) VALUES (?,?)"
+	_, err := db.PrepareAndExecVars(sqldb, query, event.Id, userId)
+	return err
+}
+
+func (event *Event) Unregiter(sqldb *sql.DB) error {
+	_, err := db.PrepareAndExecVars(
+		sqldb,
+		`DELETE FROM registrations WHERE event_id=? AND user_id = ?`,
+		event.Id,
+		event.UserId)
+	return err
+}
+
+func GetRegistrations(sqldb *sql.DB) ([]Registration, error) {
+	rows, err := db.GetRows(sqldb, "SELECT * FROM registrations")
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var registrations = []Registration{}
+	for rows.Next() {
+		var registration Registration
+		err = rows.Scan(
+			&registration.Id,
+			&registration.EventId,
+			&registration.UserId)
+
+		if err != nil {
+			return nil, err
+		}
+
+		registrations = append(registrations, registration)
+	}
+
+	return registrations, nil
 }

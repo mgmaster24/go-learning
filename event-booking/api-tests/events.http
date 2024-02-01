@@ -1,0 +1,34 @@
+POST http://localhost:8080/events
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsImV4cCI6MTcwNjU2MjM2NiwidXNlcklkIjoyfQ.PMJCHH-xzhussz9pdrKbR-pAkWasZpb-8lZZTj7BOxE
+
+{
+  "Name": "Test 3 Graduation Event",
+  "Description": "Congratulations!",
+  "Location": "Cary, NC",
+  "DateTime": "2024-02-14T13:08:30.000-06:00"
+}
+
+2024-01-15T15:23:31.78274777-05:00"
+
+###
+GET http://localhost:8080/events
+
+###
+GET http://localhost:8080/events/2
+
+###
+PUT http://localhost:8080/events/6
+Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZ21haWwuY29tIiwiZXhwIjoxNzA2NTYyNTAwLCJ1c2VySWQiOjF9.smxCrKhpCHvg1O9NGWSUtpMTFP_Su7ELdN3hWWACy2c
+
+{
+  "Name": "Some Event",
+  "Description": "Updated event location again",
+  "Location": "Charlotte, NC",
+  "DateTime": "2024-01-26T13:08:30.000-06:00"
+}
+
+###
+DELETE http://localhost:8080/events/5
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QyQGdtYWlsLmNvbSIsImV4cCI6MTcwNjU2MjM2NiwidXNlcklkIjoyfQ.PMJCHH-xzhussz9pdrKbR-pAkWasZpb-8lZZTj7BOxE

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
-	"slices"
-	"strconv"
-
+	gol_app "go-learning.com/learning/app"
 	gol_banking "go-learning.com/learning/bank"
 	gol_calculators "go-learning.com/learning/calculators"
 	gol_concurrency "go-learning.com/learning/concurrency"
@@ -13,65 +10,26 @@ import (
 	gol_exercises "go-learning.com/learning/exercises"
 	gol_notes "go-learning.com/learning/notes"
 	gol_todo "go-learning.com/learning/todo"
+	gol_tourofgo "go-learning.com/learning/tour-of-go"
 )
 
-type App struct {
-	title   string
-	execute func()
-}
-
 func main() {
-	apps := map[int]App{
-		1:  {"Calculators - Calculate Investment", gol_calculators.CalculateInvestment},
-		2:  {"Calculators - Calculate Profit", gol_calculators.CalculateProfit},
-		3:  {"Calculators - Calculate Prices", gol_calculators.CalculatePrices},
-		4:  {"Banking - GO Banking App", gol_banking.Run},
-		5:  {"Stucts Example", gol_exercises.RunStructsExercise},
-		6:  {"SLL Test", gol_datastructures.RunSLLTests},
-		7:  {"Notes App", gol_notes.Run},
-		8:  {"Todo App", gol_todo.Run},
-		9:  {"Fun with Slices", gol_exercises.RunSlicesExcercise},
-		10: {"Fun with Maps", gol_exercises.RunMapsExercise},
-		11: {"Functions Deep Dive", gol_exercises.RunFunctionsExercise},
-		12: {"Concurrency", gol_concurrency.Run},
-		13: {"Rest API", gol_eventbooking.Run},
+	apps := map[int]gol_app.App{
+		1:  {Title: "Calculators - Calculate Investment", Execute: gol_calculators.CalculateInvestment},
+		2:  {Title: "Calculators - Calculate Profit", Execute: gol_calculators.CalculateProfit},
+		3:  {Title: "Calculators - Calculate Prices", Execute: gol_calculators.CalculatePrices},
+		4:  {Title: "Banking - GO Banking App", Execute: gol_banking.Run},
+		5:  {Title: "Stucts Example", Execute: gol_exercises.RunStructsExercise},
+		6:  {Title: "SLL Test", Execute: gol_datastructures.RunSLLTests},
+		7:  {Title: "Notes App", Execute: gol_notes.Run},
+		8:  {Title: "Todo App", Execute: gol_todo.Run},
+		9:  {Title: "Fun with Slices", Execute: gol_exercises.RunSlicesExcercise},
+		10: {Title: "Fun with Maps", Execute: gol_exercises.RunMapsExercise},
+		11: {Title: "Functions Deep Dive", Execute: gol_exercises.RunFunctionsExercise},
+		12: {Title: "Concurrency", Execute: gol_concurrency.Run},
+		13: {Title: "Rest API", Execute: gol_eventbooking.Run},
+		14: {Title: "Tour of GO", Execute: gol_tourofgo.RunTOG},
 	}
 
-	var option int
-	keys := getSortedKeys(apps)
-	min := keys[0]
-	max := keys[len(keys)-1]
-	for {
-		for _, k := range keys {
-			fmt.Printf("%v) %s\n", k, apps[k].title)
-		}
-
-		fmt.Print("Select and option from above or q to quit: ")
-		var input string
-		fmt.Scan(&input)
-		fmt.Println()
-		if input == "q" {
-			fmt.Println("Exiting...")
-			return
-		}
-
-		option, _ = strconv.Atoi(input)
-		if option >= min && option <= max {
-			apps[option].execute()
-		} else {
-			fmt.Println("Invalid selection... Please try again.")
-		}
-
-		fmt.Println()
-	}
-}
-
-func getSortedKeys(apps map[int]App) []int {
-	keys := make([]int, 0, len(apps))
-	for k := range apps {
-		keys = append(keys, k)
-	}
-
-	slices.Sort(keys)
-	return keys
+	gol_app.RunAppWithSelections(apps, "GO Learning App")
 }

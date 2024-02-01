@@ -2,7 +2,6 @@ package routes
 
 import (
 	"database/sql"
-	"errors"
 	"net/http"
 	"strconv"
 
@@ -10,28 +9,43 @@ import (
 	"go-learning.com/learning/event-booking/response"
 )
 
-func RegisterRoutes(enginePtr *gin.Engine) {
-	enginePtr.GET("/events", getEvents)
-	enginePtr.GET("/events/:id", getEvent)
-	enginePtr.POST("/events", createEvent)
-	enginePtr.PUT("events/:id", updatEvent)
-	enginePtr.DELETE("events/:id", deleteEvent)
+type SqlDB struct {
+	DB *sql.DB
 }
 
-func getIdParam(context *gin.Context) int64 {
+func RegisterRoutes(enginePtr *gin.Engine, sqlDB *SqlDB) {
+	enginePtr.GET("/events", sqlDB.getEvents)
+	enginePtr.GET("/registrations", sqlDB.getRegistrations)
+	enginePtr.GET("/events/:id", sqlDB.getEvent)
+
+	authenticatedGroup := enginePtr.Group("/")
+	authenticatedGroup.Use(authenticate)
+	authenticatedGroup.POST("/events", sqlDB.createEvent)
+	authenticatedGroup.PUT("/events/:id", sqlDB.updateEvent)
+	authenticatedGroup.DELETE("/events/:id", sqlDB.deleteEvent)
+	authenticatedGroup.POST("events/:id/register", sqlDB.register)
+	authenticatedGroup.DELETE("events/:id/register", sqlDB.unregister)
+
+	enginePtr.POST("/signup", sqlDB.createUser)
+	enginePtr.POST("/login", sqlDB.login)
+}
+
+func getIdParam(context *gin.Context) (int64, bool) {
 	id, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
 		response.Error(context, http.StatusBadRequest, "Could parse id param from url.", err)
+		return -1, false
 	}
 
-	return id
+	return id, true
 }
 
-func getDBConn(c *gin.Context) (*sql.DB, error) {
-	db, ok := c.MustGet("dbConn").(*sql.DB)
-	if !ok {
-		return nil, errors.New("No database connection in middleware")
+func shouldBindJSON(context *gin.Context, obj any) bool {
+	err := context.ShouldBindJSON(&obj)
+	if err != nil {
+		response.Error(context, http.StatusBadRequest, "Could not parse request body.", err)
+		return false
 	}
 
-	return db, nil
+	return true
 }

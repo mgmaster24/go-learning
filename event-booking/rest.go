@@ -19,6 +19,6 @@ func Run() {
 	sqlDB := db.InitDB()
 	enginePtr := gin.Default()
 	enginePtr.Use(DbMiddleWare(sqlDB))
-	routes.RegisterRoutes(enginePtr)
+	routes.RegisterRoutes(enginePtr, &routes.SqlDB{DB: sqlDB})
 	enginePtr.Run(":8080") // localhost:8080
 }
