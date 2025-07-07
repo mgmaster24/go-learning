@@ -27,8 +27,9 @@ func clockwiseMatrixFlatten(input [][]int) []int {
 	if len(input) == 0 || len(input[0]) == 0 {
 		return []int{}
 	}
-	top, left, bottom, right := 0, 0, len(input)-1, len(input[0])-1
-	var result []int
+	rows, cols := len(input), len(input[0])
+	top, left, bottom, right := 0, 0, rows-1, cols-1
+	result := make([]int, 0, rows*cols)
 
 	// while indices are within valid matrix range
 	for top <= bottom && left <= right {
